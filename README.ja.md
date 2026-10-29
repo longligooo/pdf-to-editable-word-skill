@@ -7,9 +7,9 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**元のページレイアウトを失わずに** PDF を編集可能な Word（`.docx`）に変換する、ポータブルな **Agent Skill** です。再利用可能な 1 つの `SKILL.md` を **Codex、Claude Code、またはその他の Agent Skills 対応ツール**にインストールすると、付属のローカル CLI が決定的な処理で変換と検証を行います。
+元のページレイアウトをできる限り保持しながら、テキストベースの PDF を編集可能な Word（`.docx`）文書に変換する、ローカルの **PDF-to-Word コンバーター**です。テキストは検索・編集できるようになり、表、図、画像、QR コードはページの背景に残ります。
 
-> 複数のエージェントで使える PDF から編集可能な Word への変換 Skill です。元のレイアウトをできる限り保持し、テキストを検索・編集できるようにします。Codex Skill、Claude Code Skill、汎用の Agent Skills に対応し、すべての処理をローカルで行います。
+**Codex、Claude Code、その他の Agent Skills 対応ツール向けのポータブルな Agent Skill** として、またはスタンドアロンの Python CLI として利用できます。再利用可能な 1 つの `SKILL.md` が、変換と検証を同じ決定的なローカルエンジンに委ねます。
 
 - **レイアウトを保持：** ページの枠線、表、画像、QR コード、視覚的な構造を背景に残します。
 - **編集可能なテキスト：** PDF のテキストを、検索・編集できる Word のテキストボックスとして再構築します。
@@ -18,15 +18,35 @@
 
 > アルファ版のソフトウェアです。テキストベースの PDF とデスクトップ版 Microsoft Word に最適です。スキャンした PDF には OCR が必要ですが、現時点では含まれていません。
 
+[活用例](#use-cases) | [クイックスタート](#quick-start) | [CLI](#cli) | [制限](#limitations)
+
 ![PDF を編集可能な Word に変換する Agent Skill のデモ](assets/demo.gif)
 
 このデモは再配布可能な合成データから生成し、Microsoft Word でレンダリングしています。1 ページのレイアウトを保持したまま、編集可能なテキストボックスを `37` 個作成し、その後 DOCX 内で `Q2` を `Q3` に、`48 hours` を `24 hours` に変更しています。
 
 [元の PDF をダウンロード](examples/demo-source.pdf) | [編集可能な DOCX をダウンロード](examples/demo-output.docx) | [編集後の DOCX をダウンロード](examples/demo-edited.docx)
 
-## 60 秒で Skill をインストール
+<a id="use-cases"></a>
 
-Python 3.10 以降、[pipx](https://pipx.pypa.io/)、[Poppler](https://poppler.freedesktop.org/)（`pdftoppm`）をインストールしてから、次を実行します。
+## 活用例
+
+- **固定レイアウトのレポートを編集：** ページの枠線、グラフなどの視覚要素を Word 内に残しながら、既存の PDF のテキストを修正します。
+- **文書をローカルで処理：** オンラインの PDF 変換サービスに送信せずにファイルを変換します。
+- **文書処理を自動化：** Codex や Claude Code に PDF の調査・変換・検証を依頼するか、同じコマンドをターミナルで実行します。中断した長い文書の変換は `--resume` で再開できます。
+
+既存のレイアウト内でテキストを変更する用途に適しています。表を編集可能な Word の表として再構築するためのものではありません。[既知の制限](#limitations)を参照してください。
+
+<a id="quick-start"></a>
+
+## クイックスタート：Skill のインストール
+
+**1. 必要なソフトウェアをインストールします。**
+
+Python 3.10 以降、[pipx](https://pipx.pypa.io/)、[Poppler](https://poppler.freedesktop.org/)（`pdftoppm`）をインストールします。
+
+Debian または Ubuntu では、`sudo apt-get install poppler-utils` で Poppler をインストールします。Windows では、`pdftoppm.exe` を `PATH` に追加するか、環境変数 `PDFTOPPM` を設定してください。
+
+**2. コンバーターをインストールし、エージェントを選択します。**
 
 ```bash
 pipx install https://github.com/longligooo/pdf-to-editable-word-skill/releases/download/v0.1.0/pdf_to_editable_word-0.1.0-py3-none-any.whl
@@ -36,8 +56,6 @@ pdf2word doctor
 pdf2word skill install --agent codex
 pdf2word skill install --agent claude
 ```
-
-Debian または Ubuntu では、`sudo apt-get install poppler-utils` で Poppler をインストールします。Windows では、`pdftoppm.exe` を `PATH` に追加するか、環境変数 `PDFTOPPM` を設定してください。
 
 `pipx` を使わない場合は、GitHub から直接インストールできます。
 
@@ -51,7 +69,9 @@ python -m pip install "https://github.com/longligooo/pdf-to-editable-word-skill/
 pdf2word skill install --destination /path/to/agent/skills
 ```
 
-続いて、エージェントに次のように依頼します。
+**3. 最初の文書を変換します。**
+
+エージェントに次のように依頼します。
 
 ```text
 report.pdf を編集可能な Word 文書に変換し、レイアウトを保持してください。
@@ -59,6 +79,8 @@ report.pdf を編集可能な Word 文書に変換し、レイアウトを保持
 ```
 
 Skill に対応していないエージェントでも、`pdf2word` を直接呼び出せます。
+
+<a id="cli"></a>
 
 ## スタンドアロン CLI を使う
 
@@ -100,6 +122,8 @@ pdf2word skill install [--agent codex|claude] [--scope user|project]
 ```
 
 Poppler が `PATH` にない場合は `--pdftoppm PATH` を使います。0 始まりのページ範囲を指定するには、`--start` と `--end` を使います。
+
+<a id="limitations"></a>
 
 ## 既知の制限
 

@@ -7,9 +7,9 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Une **Agent Skill** portable qui convertit les PDF en documents Word modifiables (`.docx`) **sans sacrifier la mise en page d'origine**. Installez un même fichier `SKILL.md` réutilisable dans **Codex, Claude Code ou d'autres outils compatibles avec Agent Skills** ; l'interface en ligne de commande (CLI) locale incluse assure une conversion déterministe et la validation du résultat.
+Un **convertisseur PDF vers Word** local qui transforme les PDF contenant une couche de texte en documents Word modifiables (`.docx`), en préservant aussi fidèlement que possible la mise en page d'origine. Le texte devient modifiable et peut faire l'objet de recherches ; les tableaux, schémas, images et codes QR restent dans l'arrière-plan de la page.
 
-> Cette Skill de conversion PDF vers Word modifiable fonctionne avec plusieurs agents : elle préserve autant que possible la mise en page d'origine, rend le texte modifiable et permet d'y effectuer des recherches. Elle prend en charge les Skills de Codex, de Claude Code et le format générique Agent Skills, avec un traitement entièrement local.
+Utilisez-le comme **Agent Skill portable pour Codex, Claude Code et d'autres outils compatibles avec Agent Skills**, ou via sa CLI Python autonome. Un même fichier `SKILL.md` réutilisable délègue la conversion et la validation au même moteur local déterministe.
 
 - **Mise en page préservée :** les bordures de page, tableaux, images, codes QR et la structure visuelle sont conservés dans l'arrière-plan.
 - **Texte modifiable :** le texte du PDF est reconstruit sous forme de zones de texte Word modifiables dans lesquelles il est possible d'effectuer des recherches.
@@ -18,15 +18,35 @@ Une **Agent Skill** portable qui convertit les PDF en documents Word modifiables
 
 > Logiciel en version alpha. Il convient surtout aux PDF contenant une couche de texte et à la version de bureau de Microsoft Word. Les PDF numérisés nécessitent une reconnaissance optique de caractères (OCR), qui n'est pas encore incluse.
 
+[Cas d'utilisation](#use-cases) | [Démarrage rapide](#quick-start) | [CLI](#cli) | [Limites](#limitations)
+
 ![Démonstration de l'Agent Skill de conversion PDF vers Word modifiable](assets/demo.gif)
 
 La démonstration est générée à partir de données synthétiques redistribuables, avec un rendu effectué dans Microsoft Word. Elle préserve la mise en page sur une seule page, crée `37` zones de texte modifiables, puis remplace `Q2` par `Q3` et `48 hours` par `24 hours` dans le DOCX.
 
 [Télécharger le PDF source](examples/demo-source.pdf) | [Télécharger le DOCX modifiable](examples/demo-output.docx) | [Télécharger le DOCX modifié](examples/demo-edited.docx)
 
-## Installer la Skill en 60 secondes
+<a id="use-cases"></a>
 
-Installez Python 3.10+, [pipx](https://pipx.pypa.io/) et [Poppler](https://poppler.freedesktop.org/) (`pdftoppm`), puis exécutez :
+## Quand l'utiliser
+
+- **Modifier des rapports à mise en page fixe :** corrigez le texte d'un PDF existant tout en conservant les bordures de page, graphiques et autres éléments visuels dans Word.
+- **Garder les documents en local :** convertissez les fichiers sans les envoyer à un service de conversion PDF en ligne.
+- **Automatiser les workflows documentaires :** laissez Codex ou Claude Code inspecter, convertir et valider les PDF, ou exécutez les mêmes commandes dans un terminal. Reprenez les conversions interrompues de documents longs avec `--resume`.
+
+Cet outil convient surtout aux modifications de texte dans une mise en page existante, et non à la reconstruction de tableaux en tant que tableaux Word modifiables. Consultez les [limites connues](#limitations).
+
+<a id="quick-start"></a>
+
+## Démarrage rapide : installer la Skill
+
+**1. Installez les prérequis.**
+
+Installez Python 3.10+, [pipx](https://pipx.pypa.io/) et [Poppler](https://poppler.freedesktop.org/) (`pdftoppm`).
+
+Sous Debian ou Ubuntu, installez Poppler avec `sudo apt-get install poppler-utils`. Sous Windows, ajoutez `pdftoppm.exe` au `PATH` ou définissez la variable d'environnement `PDFTOPPM`.
+
+**2. Installez le convertisseur et choisissez votre agent.**
 
 ```bash
 pipx install https://github.com/longligooo/pdf-to-editable-word-skill/releases/download/v0.1.0/pdf_to_editable_word-0.1.0-py3-none-any.whl
@@ -36,8 +56,6 @@ pdf2word doctor
 pdf2word skill install --agent codex
 pdf2word skill install --agent claude
 ```
-
-Sous Debian ou Ubuntu, installez Poppler avec `sudo apt-get install poppler-utils`. Sous Windows, ajoutez `pdftoppm.exe` au `PATH` ou définissez la variable d'environnement `PDFTOPPM`.
 
 Sans `pipx`, installez directement depuis GitHub :
 
@@ -51,7 +69,9 @@ Pour un autre outil compatible avec Agent Skills, installez la Skill dans son r�
 pdf2word skill install --destination /path/to/agent/skills
 ```
 
-Demandez ensuite à votre agent :
+**3. Convertissez votre premier document.**
+
+Demandez à votre agent :
 
 ```text
 Convertis report.pdf en document Word modifiable en préservant la mise en page,
@@ -59,6 +79,8 @@ valide le résultat et indique-moi les pages qui nécessitent une vérification 
 ```
 
 Les agents qui ne prennent pas en charge les Skills peuvent appeler directement `pdf2word`.
+
+<a id="cli"></a>
 
 ## Utiliser la CLI autonome
 
@@ -100,6 +122,8 @@ pdf2word skill install [--agent codex|claude] [--scope user|project]
 ```
 
 Utilisez `--pdftoppm PATH` lorsque Poppler n'est pas dans le `PATH`. Utilisez `--start` et `--end` pour définir une plage de pages dont les indices commencent à zéro.
+
+<a id="limitations"></a>
 
 ## Limites connues
 

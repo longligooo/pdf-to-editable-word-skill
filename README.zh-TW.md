@@ -7,9 +7,9 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-這是一個可跨 Agent 使用的 **Agent Skill**：將 PDF 轉為文字可搜尋、可選取、可編輯的 Word（`.docx`），同時**盡可能保留原始頁面版面**。將同一份可重複使用的 `SKILL.md` 安裝到 **Codex、Claude Code 或其他相容於 Agent Skills 的工具**中；隨附的本機 CLI 負責執行確定性的轉換與驗證，也可以脫離 Agent 獨立使用。
+這是一款本機 **PDF 轉 Word 工具**：將具有文字層的 PDF 轉為可編輯的 Word（`.docx`）文件，同時盡可能保留原始頁面版面。文字可搜尋、可選取、可編輯；表格、圖表、圖片與 QR Code 則保留在頁面背景中。
 
-> 這是一個跨 Agent 的 PDF 轉可編輯 Word Skill：盡可能保留原始版面，文字可搜尋、可編輯，支援 Codex Skill、Claude Code Skill 與通用 Agent Skills，全程在本機處理。
+既可以作為 **Codex、Claude Code 及其他相容於 Agent Skills 工具的通用 Skill** 使用，也可以直接執行獨立的 Python CLI。同一份可重複使用的 `SKILL.md` 將轉換與驗證交給確定性的本機引擎完成。
 
 - **版面保真：** 頁面框線、表格、圖片、QR Code 與視覺結構保留在背景層。
 - **文字可編輯：** PDF 文字依原座標重建為可搜尋、可編輯的 Word 文字方塊。
@@ -18,15 +18,35 @@
 
 > 目前為 Alpha 版本，適合具有文字層的 PDF，並優先相容於桌面版 Microsoft Word。掃描版 PDF 需要 OCR，目前尚未包含此功能。
 
+[適用情境](#use-cases) | [快速開始](#quick-start) | [CLI](#cli) | [已知限制](#limitations)
+
 ![PDF 轉可編輯 Word Agent Skill 示範](assets/demo.gif)
 
 示範完全使用可公開散布的合成資料，並透過 Microsoft Word 實際轉譯呈現。轉換後保留單頁版面，產生 `37` 個可編輯文字方塊，隨後直接在 DOCX 中將 `Q2` 改為 `Q3`、將 `48 hours` 改為 `24 hours`。
 
 [下載來源 PDF](examples/demo-source.pdf) | [下載可編輯 DOCX](examples/demo-output.docx) | [下載編輯後的 DOCX](examples/demo-edited.docx)
 
-## 60 秒安裝 Skill
+<a id="use-cases"></a>
 
-先安裝 Python 3.10+、[pipx](https://pipx.pypa.io/) 與 [Poppler](https://poppler.freedesktop.org/)（`pdftoppm`），然後執行：
+## 適用情境
+
+- **編輯固定版面的報告：** 修改現有 PDF 中的文字，同時在 Word 中保留頁面框線、圖表及其他視覺元素。
+- **讓文件留在本機：** 轉換檔案，無需將其傳送至線上 PDF 轉換服務。
+- **自動化文件處理：** 讓 Codex 或 Claude Code 檢查、轉換並驗證 PDF，也可以在終端機中執行相同命令。長文件轉換中斷後，可用 `--resume` 繼續執行。
+
+適合修改現有版面中的文字，而不是將表格重建為可編輯的 Word 表格。詳見[已知限制](#limitations)。
+
+<a id="quick-start"></a>
+
+## 快速開始：安裝 Skill
+
+**1. 安裝前置相依套件。**
+
+先安裝 Python 3.10+、[pipx](https://pipx.pypa.io/) 與 [Poppler](https://poppler.freedesktop.org/)（`pdftoppm`）。
+
+在 Debian 或 Ubuntu 上，使用 `sudo apt-get install poppler-utils` 安裝 Poppler。在 Windows 上，將 `pdftoppm.exe` 加入 `PATH`，或設定 `PDFTOPPM` 環境變數。
+
+**2. 安裝轉換器並選擇 Agent。**
 
 ```bash
 pipx install https://github.com/longligooo/pdf-to-editable-word-skill/releases/download/v0.1.0/pdf_to_editable_word-0.1.0-py3-none-any.whl
@@ -36,8 +56,6 @@ pdf2word doctor
 pdf2word skill install --agent codex
 pdf2word skill install --agent claude
 ```
-
-在 Debian 或 Ubuntu 上，使用 `sudo apt-get install poppler-utils` 安裝 Poppler。在 Windows 上，將 `pdftoppm.exe` 加入 `PATH`，或設定 `PDFTOPPM` 環境變數。
 
 沒有 `pipx` 時，可以直接從 GitHub 安裝：
 
@@ -51,7 +69,9 @@ python -m pip install "https://github.com/longligooo/pdf-to-editable-word-skill/
 pdf2word skill install --destination /path/to/agent/skills
 ```
 
-然後直接告訴 Agent：
+**3. 轉換第一份文件。**
+
+告訴 Agent：
 
 ```text
 將 report.pdf 轉為可編輯的 Word 文件，保留原始版面，完成後驗證結果，
@@ -59,6 +79,8 @@ pdf2word skill install --destination /path/to/agent/skills
 ```
 
 不支援 Skill 的 Agent 也可以直接呼叫 `pdf2word`。
+
+<a id="cli"></a>
 
 ## 直接使用 CLI
 
@@ -100,6 +122,8 @@ pdf2word skill install [--agent codex|claude] [--scope user|project]
 ```
 
 如果 Poppler 不在 `PATH` 中，使用 `--pdftoppm PATH` 指定路徑。使用 `--start` 與 `--end` 指定從零開始計數的頁面範圍。
+
+<a id="limitations"></a>
 
 ## 已知限制
 
