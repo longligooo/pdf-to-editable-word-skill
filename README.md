@@ -1,6 +1,6 @@
 # PDF to Editable Word Skill - Layout-Preserving PDF-to-DOCX for AI Agents
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [Français](README.fr.md) | [한국어](README.ko.md) | [日本語](README.ja.md)
 
 [![CI](https://github.com/longligooo/pdf-to-editable-word-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/longligooo/pdf-to-editable-word-skill/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/longligooo/pdf-to-editable-word-skill)](https://github.com/longligooo/pdf-to-editable-word-skill/releases/latest)
@@ -9,7 +9,7 @@
 
 A portable **Agent Skill** that converts PDF to editable Word (`.docx`) **without throwing away the original page layout**. Install one reusable `SKILL.md` in **Codex, Claude Code, or other Agent Skills-compatible tools**; the included local CLI performs the deterministic conversion and validation.
 
-> 这是一个跨 Agent 的 PDF 转可编辑 Word Skill：尽量保持原始排版，文字可搜索、可编辑，支持 Codex Skill、Claude Code Skill 和通用 Agent Skills，全程本地处理。
+> A cross-agent PDF-to-editable-Word Skill: preserve the original layout as closely as possible, keep text searchable and editable, and work with Codex Skills, Claude Code Skills, and general Agent Skills, with all processing performed locally.
 
 - **Layout-preserving:** keeps page borders, tables, images, QR codes, and visual structure in the background.
 - **Editable text:** rebuilds PDF text as searchable, editable Word text boxes.
@@ -132,3 +132,4 @@ Tests generate synthetic PDFs at runtime; no copyrighted sample documents are co
 ## License
 
 MIT. Poppler is an external runtime dependency and is not distributed by this repository.
+
