@@ -1,15 +1,15 @@
 # PDF to Editable Word Skill - Layout-Preserving PDF-to-DOCX for AI Agents
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+[English](README.md) | [简体中文](README.zh-CN.md) | [繁體中文](README.zh-TW.md) | [Français](README.fr.md) | [한국어](README.ko.md) | [日本語](README.ja.md)
 
 [![CI](https://github.com/longligooo/pdf-to-editable-word-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/longligooo/pdf-to-editable-word-skill/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/longligooo/pdf-to-editable-word-skill)](https://github.com/longligooo/pdf-to-editable-word-skill/releases/latest)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A portable **Agent Skill** that converts PDF to editable Word (`.docx`) **without throwing away the original page layout**. Install one reusable `SKILL.md` in **Codex, Claude Code, or other Agent Skills-compatible tools**; the included local CLI performs the deterministic conversion and validation.
+A local **PDF-to-Word converter** that turns text-based PDFs into editable Word (`.docx`) documents while preserving the original page layout as closely as possible. Text becomes searchable and editable; tables, diagrams, images, and QR codes remain in the page background.
 
-> 这是一个跨 Agent 的 PDF 转可编辑 Word Skill：尽量保持原始排版，文字可搜索、可编辑，支持 Codex Skill、Claude Code Skill 和通用 Agent Skills，全程本地处理。
+Run it as a **portable Agent Skill for Codex, Claude Code, and other Agent Skills-compatible tools**, or use the standalone Python CLI. One reusable `SKILL.md` delegates conversion and validation to the same deterministic local engine.
 
 - **Layout-preserving:** keeps page borders, tables, images, QR codes, and visual structure in the background.
 - **Editable text:** rebuilds PDF text as searchable, editable Word text boxes.
@@ -18,15 +18,36 @@ A portable **Agent Skill** that converts PDF to editable Word (`.docx`) **withou
 
 > Alpha software. Best for text-based PDFs and desktop Microsoft Word. Scanned PDFs need OCR, which is not included yet.
 
+[Use cases](#use-cases) | [Quick start](#quick-start) | [CLI](#cli) | [Limitations](#limitations)
+
 ![PDF to editable Word Agent Skill demo](assets/demo.gif)
 
 The demo is generated from redistributable synthetic data and rendered with Microsoft Word. It preserves the one-page layout, creates `37` editable text boxes, and then changes `Q2` to `Q3` and `48 hours` to `24 hours` inside the DOCX.
 
 [Download the source PDF](examples/demo-source.pdf) | [Download the editable DOCX](examples/demo-output.docx) | [Download the edited DOCX](examples/demo-edited.docx)
 
-## Install the Skill in 60 seconds
+<a id="use-cases"></a>
 
-Install Python 3.10+, [pipx](https://pipx.pypa.io/), and [Poppler](https://poppler.freedesktop.org/) (`pdftoppm`), then run:
+## When to use it
+
+- **Edit fixed-layout reports:** correct text in an existing PDF while retaining page borders, charts, and other visual elements in Word.
+- **Keep documents local:** convert files without sending them to an online PDF conversion service.
+- **Automate document workflows:** let Codex or Claude Code inspect, convert, and validate PDFs, or run the same commands in a terminal. Resume interrupted long-document conversions with `--resume`.
+
+Best for text changes within an existing layout, not rebuilding tables as editable Word tables. See [known limitations](#limitations).
+
+<a id="install-the-skill-in-60-seconds"></a>
+<a id="quick-start"></a>
+
+## Quick start: install the Skill
+
+**1. Install the prerequisites.**
+
+Install Python 3.10+, [pipx](https://pipx.pypa.io/), and [Poppler](https://poppler.freedesktop.org/) (`pdftoppm`).
+
+On Debian or Ubuntu, install Poppler with `sudo apt-get install poppler-utils`. On Windows, add `pdftoppm.exe` to `PATH` or set the `PDFTOPPM` environment variable.
+
+**2. Install the converter and choose your agent.**
 
 ```bash
 pipx install https://github.com/longligooo/pdf-to-editable-word-skill/releases/download/v0.1.0/pdf_to_editable_word-0.1.0-py3-none-any.whl
@@ -36,8 +57,6 @@ pdf2word doctor
 pdf2word skill install --agent codex
 pdf2word skill install --agent claude
 ```
-
-On Debian or Ubuntu, install Poppler with `sudo apt-get install poppler-utils`. On Windows, add `pdftoppm.exe` to `PATH` or set the `PDFTOPPM` environment variable.
 
 Without `pipx`, install directly from GitHub:
 
@@ -51,7 +70,9 @@ For another Agent Skills-compatible tool, install to its skills directory:
 pdf2word skill install --destination /path/to/agent/skills
 ```
 
-Then ask your agent:
+**3. Convert your first document.**
+
+Ask your agent:
 
 ```text
 Convert report.pdf to an editable Word document, preserve the layout,
@@ -59,6 +80,8 @@ validate the result, and tell me which pages need visual review.
 ```
 
 Agents without Skill support can call `pdf2word` directly.
+
+<a id="cli"></a>
 
 ## Use the standalone CLI
 
@@ -100,6 +123,8 @@ pdf2word skill install [--agent codex|claude] [--scope user|project]
 ```
 
 Use `--pdftoppm PATH` when Poppler is not on `PATH`. Use `--start` and `--end` for a zero-based page range.
+
+<a id="limitations"></a>
 
 ## Known limitations
 
